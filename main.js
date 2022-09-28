@@ -1,5 +1,5 @@
 const searchField = document.querySelector(".search");
-const sForm = document.querySelector(".search-form");
+const searchForm = document.querySelector(".search-form");
 const hintsList = document.querySelector(".hints");
 const resultsList = document.querySelector(".results");
 let resultsArr = [];
@@ -34,33 +34,32 @@ const renderData = (items) => {
     hints.push(hint);
     resultsArr.push(result);
   });
-  // prepare hints
   renderHints(hints);
 };
 
 const renderHints = (hints) => {
   clearList(hintsList);
-  let ord = 0;
+  let order = 0;
+  // Просто фрагмент который расстворяется при добавлении в разметку
   let fragment = new DocumentFragment();
   for (let h of hints) {
     let li = document.createElement("li");
     li.classList.add("hints__item");
-    li.dataset.ord = ord++;
+    li.dataset.order = order++;
     li.append(h);
     fragment.append(li);
   }
   hintsList.append(fragment);
 };
 
-const renderResult = (r) => {
+const renderResult = (result) => {
   let fragment = new DocumentFragment();
-  console.dir(fragment);
   let li = document.createElement("li");
   li.classList.add("results__item");
   li.insertAdjacentHTML(
     "afterbegin",
-    `<ul><li><a target="_blank" href="${r.html_url}"><span>Name:</span> ${r.name}</a></li>
-        <li><span>Owner:</span> ${r.owner}</li><li><span>Stars:</span> ${r.stars}</li></ul>`
+    `<ul><li><a target="_blank" href="${result.html_url}"><span>Name:</span> ${result.name}</a></li>
+        <li><span>Owner:</span> ${result.owner}</li><li><span>Stars:</span> ${result.stars}</li></ul>`
   );
   li.insertAdjacentHTML(
     "beforeend",
@@ -82,10 +81,9 @@ const requestData = (q) => {
   fetch(requestURL)
     .then((response) => response.json())
     .then((data) => {
-      console.log(data);
       renderData(data.items);
     })
-    .catch((error) => console.log(error));
+    .catch((error) => console.error(error));
 };
 
 const debRequest = debounce(requestData, 300);
@@ -101,36 +99,20 @@ searchField.addEventListener("input", function () {
   }
 });
 
-searchField.addEventListener("change", function () {
-  //console.log('change', this.value);
-});
-
-searchField.addEventListener("keyup", function (evt) {
-  if (evt.keyCode === "13") {
-    //console.log('key ENTER');
-  }
-});
-
-sForm.addEventListener("submit", function (evt) {
-  evt.preventDefault();
-  //console.log('submit');
-});
-
-resultsList.addEventListener("click", function (evt) {
-  let hit = evt.target;
+resultsList.addEventListener("click", function (event) {
+  let hit = event.target;
   if (hit.tagName === "BUTTON") {
     const resultsItem = hit.closest(".results__item");
-    //resultsItem.classList.add('hidden');
     resultsItem.closest(".results").removeChild(resultsItem);
   }
 });
 
-hintsList.addEventListener("click", function (evt) {
-  let hit = evt.target;
+hintsList.addEventListener("click", function (event) {
+  let hit = event.target;
   if (hit.tagName === "LI") {
     searchField.value = "";
-    let ord = hit.dataset.ord;
-    renderResult(resultsArr[ord]);
+    let order = hit.dataset.order;
+    renderResult(resultsArr[order]);
     clearList(hintsList);
   }
 });
