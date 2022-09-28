@@ -34,46 +34,48 @@ const renderData = (items) => {
     hints.push(hint);
     resultsArr.push(result);
   });
+  hintsList.addEventListener("click", hintsListener);
+
   renderHints(hints);
 };
 
 const renderHints = (hints) => {
   clearList(hintsList);
   let order = 0;
-  // Просто фрагмент который расстворяется при добавлении в разметку
-  let fragment = new DocumentFragment();
-  for (let h of hints) {
-    let li = document.createElement("li");
-    li.classList.add("hints__item");
-    li.dataset.order = order++;
-    li.append(h);
-    fragment.append(li);
+  // Просто фрагмент который собирает элементы и расстворяется при добавлении в разметку
+  let hintCollect = new DocumentFragment();
+  for (let hint of hints) {
+    let hintElement = document.createElement("li");
+    hintElement.classList.add("hints__item");
+    hintElement.dataset.order = order++;
+    hintElement.append(hint);
+    hintCollect.append(hintElement);
   }
-  hintsList.append(fragment);
+  hintsList.append(hintCollect);
 };
 
 const renderResult = (result) => {
-  let fragment = new DocumentFragment();
-  let li = document.createElement("li");
-  li.classList.add("results__item");
-  li.insertAdjacentHTML(
+  let resultCollect = new DocumentFragment();
+  let resultElement = document.createElement("li");
+  resultElement.classList.add("results__item");
+  resultElement.insertAdjacentHTML(
     "afterbegin",
     `<ul><li><a target="_blank" href="${result.html_url}"><span>Name:</span> ${result.name}</a></li>
         <li><span>Owner:</span> ${result.owner}</li><li><span>Stars:</span> ${result.stars}</li></ul>`
   );
-  li.insertAdjacentHTML(
+  resultElement.insertAdjacentHTML(
     "beforeend",
     `<button type="button" class="x" tabindex="1" />`
   );
-  fragment.append(li);
-  resultsList.append(fragment);
+  resultCollect.append(resultElement);
+  resultsList.append(resultCollect);
   resultsArr = [];
 };
 
 // ==============
 
-const requestData = (q) => {
-  const requestURL = `https://api.github.com/search/repositories?q=${q.replaceAll(
+const requestData = (qualifier) => {
+  const requestURL = `https://api.github.com/search/repositories?q=${qualifier.replaceAll(
     /[\s]+/g,
     "+"
   )}&per_page=5`;
@@ -99,20 +101,26 @@ searchField.addEventListener("input", function () {
   }
 });
 
-resultsList.addEventListener("click", function (event) {
+const resultListener = function (event) {
   let hit = event.target;
   if (hit.tagName === "BUTTON") {
     const resultsItem = hit.closest(".results__item");
-    resultsItem.closest(".results").removeChild(resultsItem);
+    const parent = resultsItem.closest(".results");
+    parent.removeChild(resultsItem);
+    if (parent.children.length < 1)
+      resultsList.removeEventListener("click", resultListener);
   }
-});
+};
 
-hintsList.addEventListener("click", function (event) {
+const hintsListener = function (event) {
   let hit = event.target;
   if (hit.tagName === "LI") {
     searchField.value = "";
     let order = hit.dataset.order;
+    if (resultsList.children.length < 1)
+      resultsList.addEventListener("click", resultListener);
     renderResult(resultsArr[order]);
     clearList(hintsList);
+    hintsList.removeEventListener("click", hintsListener);
   }
-});
+};
