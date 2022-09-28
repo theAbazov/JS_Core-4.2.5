@@ -8,7 +8,7 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
   <defs id="defs2" />
-  <g id="layer1" transearchForm="translate(-59.709237,-85.953631)">
+  <g id="layer1" transform="translate(-59.709237,-85.953631)">
     <path
        id="path959"
        style="color:#000000;fill:#ff0000;stroke-width:1"
